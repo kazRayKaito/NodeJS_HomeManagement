@@ -2,23 +2,20 @@
 <html>
 <head>
     <title>Remote Control</title>
+    <link rel="stylesheet" href="style.css" type="text/css">
+    <script type="text/javascript" src="canvas.js"></script>
+    <script type="text/javascript" src="inputManager.js"></script>
     <script src="/socket.io/socket.io.js"></script>
 	<meta name="viewport" content="width=device-width, initial-scale=1"/>
 </head>
 <body>
-    <h1>Remote Control</h1>
-    <button onclick="clicked('cool')">冷房</button>
-    <button onclick="clicked('heat')">暖房</button><a id = "mode"></a><br>
-    <button onclick="clicked('velo')">風速</button><a id = "velo"></a><br>
-    <button onclick="clicked('dire')">風向</button><a id = "dire"></a><br>
-    <button onclick="clicked('clean')">内部クリーン</button><a id = "clean"></a><br>
-    <button onclick="clicked('power')">パワーモード</button><a id = "power"></a><br>
-    <button onclick="sendSignal()">送信</button>
-    <button onclick="turnOff()">停止</button>
+    <h1 align="center">Remote Control</h1><br>
+    <div id="canvas-container">
+        <canvas id="Video">Your browser doesn't support canvas</canvas></div><br>
+        <canvas id="Canvas">Your browser doesn't support canvas</canvas>
+    </div>
 
     <script>
-        const socketio = io();
-
         //Set vairables
         let cool = 0; // 1 [ 0：OFF,   1：ON]
         let temp =15; //15 [ 0 ~ 15]
@@ -26,36 +23,28 @@
         let dire = 5; // 7 [ 0：自動,  1：横,   2：2,    3：3,    4：4,    5：下,   6：?,    7：全] 
         let clean = 0;// 1 [ 0：OFF,   1：ON]
         let power = 1;// 1 [ 0：OFF,   1：ON]
+
+        //Set Canvas
+        const canvas = document.getElementById("Canvas");
+
+        const socketio = io();
         
         const signal_original = "CB230126200000084030000000000000ED00";
         let digits = new Array(9).fill(0);
         let parameter = "";
 
-        //Get elements
-        const modeTxt = document.getElementById("mode");
-        const veloTxt = document.getElementById("velo");
-        const direTxt = document.getElementById("dire");
-        const cleanTxt = document.getElementById("clean");
-        const powerTxt = document.getElementById("power");
-
         const log = (logText) => {socketio.emit("log", logText);}
-
-        function updateStatus(){
-            modeTxt.innerHTML = cool?"冷房":"暖房";
-            veloTxt.innerHTML = velo;
-            direTxt.innerHTML = dire;
-            cleanTxt.innerHTML = clean?"ON":"OFF";
-            powerTxt.innerHTML = power?"ON":"OFF";
-        }
+        initCanvas();
+        initEventlistener();
 
         function clicked(code){
             if     (code == "cool"){ cool = 1;}
             else if(code == "heat"){ cool = 0;}
-            else if(code == "velo"){ velo = (velo + 1) % 5;}
-            else if(code == "dire"){ dire = (dire + 1) % 8;}
+            else if(code == "velo"){ velo = (velo) % 4 + 1;}
+            else if(code == "dire"){ dire = (dire) % 5 + 1;}
             else if(code == "clean"){ clean = (clean + 1) % 2;}
             else if(code == "power"){ power = (power + 1) % 2;}
-            updateStatus();
+            draw();
         }
         
         function turnOff(){
@@ -94,8 +83,6 @@
             }
             socketio.emit("signal", parameter);
         }
-
-        updateStatus();
     </script>
 </body>
 </html>

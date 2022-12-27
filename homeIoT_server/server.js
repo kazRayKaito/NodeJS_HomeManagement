@@ -1,14 +1,15 @@
 const express = require("express");
+const path = require("path");
 const app = express();
 const http = require("http").Server(app);
 const io = require("socket.io")(http);
 const PORT = process.env.PORT || 4443;
 const { exec } = require("child_process");
 
+app.use(express.static(path.join(__dirname, 'www')));
 
-app.get('/', function(req,res){
-    console.log("here!");
-    res.sendFile(__dirname+"/www/index.html");
+app.get('/', function(req, res) {
+    res.redirect('index.html');
 });
 
 io.on("connection", function(socket){
@@ -18,7 +19,7 @@ io.on("connection", function(socket){
             if(error){
                 exec("sudo killall pigpiod", (error, stdout, stderr) => console.log(stdout));
             }
-            console.log(stdout)
+            console.log(stdout);
         });
     });
     socket.on("log", function(logText){
