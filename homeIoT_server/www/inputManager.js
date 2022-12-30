@@ -1,6 +1,7 @@
 let touching = 0;
 let tempSlide = false;
-let windSlide = false;
+let direSlide = false;
+let veloSlide = false;
 let sendButtonOn = false;
 let offButtonOn = false;
 let lastMoveTime=0;
@@ -71,9 +72,12 @@ const touch = (x,y,event) => {
             updateTemp(x,y);
         }else if(xi >= 4 && xi <= 8){
             if(yi <= 9){
-                clicked('dire');
+                //clicked('dire');
+                direSlide = true;
+                updateDire(x,y);
             }else{
                 clicked('velo');
+                veloSlide = true;
             }
             windSlide = true;
             updateWind(x,y);
@@ -89,33 +93,55 @@ const touch = (x,y,event) => {
             turnOff();
         }
     }
-    updateStatus();
     draw();
 
     //log(x +", "+y + "_touched");
 }
 const move = (x,y) => {
     if(tempSlide) updateTemp(x,y);
-    if(windSlide) updateWind(x,y);
+    if(direSlide) updateDire(x,y);
+    if(veloSlide) updateVelo(x,y);
+    draw();
     //log(x +", "+y + "_move");
 }
 const release = (x,y,event) => {
     if(!touching) return;
     touching = false;
     tempSlide= false;
-    windSlide= false;
+    direSlide= false;
+    veloSlide= false;
     sendButtonOn = false;
     offButtonOn  = false;
     //log(x +", "+y + "_realeased");
     draw();
-    updateStatus();
+}
+const updateVelo = (x,y) => {
+    let tempVelo = Math.floor(width * ((4.5)/division) - side*0.5);
+    tempVelo = x - tempVelo;
+    tempVelo = Math.floor(tempVelo/side)+1;
+    tempVelo = Math.min(tempVelo,4);
+    tempVelo = Math.max(tempVelo,1);
+    velo = tempVelo;
+    return;
+}
+const updateDire = (x,y) => {
+    let dx = x - Math.floor(width * (7/division));
+    let dy = y - Math.floor(width * (7/division));
+    let tempDire = -1*Math.atan(dy/dx)*180/Math.PI;
+    tempDire = Math.floor(tempDire);
+    if(tempDire <= -45){
+        tempDire = 90;
+    }else if(tempDire <= 0){
+        tempDire = 0;
+    }
+    tempDire = Math.floor(Math.min(5,tempDire/18+1));
+    dire = tempDire;
 }
 const updateTemp = (x,y) => {
     let tempT = Math.floor(16*(y-height * 6.5 / 16)/(height * 4.5 / 16));
     tempT = Math.max(0,tempT);
     tempT = Math.min(16,tempT);
     temp = 15 - tempT;
-    draw();
     return;
 }
 const updateWind = (x,y) => {

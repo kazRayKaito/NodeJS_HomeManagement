@@ -14,10 +14,13 @@ app.get('/', function(req, res) {
 
 io.on("connection", function(socket){
     socket.on("signal", function(signal){
-        console.log("Signal: " + signal);
+        console.log("Socket.on:signal");
         exec("sudo ./IR_signal_Transmitter " + signal, (error, stdout, stderr) => {
             if(error){
+                console.log("Error: sudo killall pigpiod");
                 exec("sudo killall pigpiod", (error, stdout, stderr) => console.log(stdout));
+            }else{
+                console.log("Signal: " + signal);
             }
             console.log(stdout);
         });
